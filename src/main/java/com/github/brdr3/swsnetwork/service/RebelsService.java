@@ -25,18 +25,22 @@ public class RebelsService {
         this.rebelBasesRepository = rbr;
     }
 
-    public RebelBaseDTO insertRebelBase(RebelBaseDTO rebelBaseDTO) {
+    public RebelBaseDTO insertOrGetRebelBase(RebelBaseDTO rebelBaseDTO) {
         try {
             RebelBase savedRebelBase = rebelBasesRepository.save(RebelMapper.toRebelBase(rebelBaseDTO));
             return RebelMapper.toRebelBaseDTO(savedRebelBase);
         } catch (DataIntegrityViolationException e) {
             RebelBase rebelBase = rebelBasesRepository.findByUniqueKey(rebelBaseDTO.getLatitude(), rebelBaseDTO.getLongitude());
+            if(rebelBase == null) {
+                rebelBase = rebelBasesRepository.findByUniqueKey(rebelBaseDTO.getName());
+            }
+
             return RebelMapper.toRebelBaseDTO(rebelBase);
         }
     }
 
     public RebelDTO insertRebel(RebelDTO rebelDTO) throws Exception {
-        RebelBaseDTO savedRebelBaseDTO = insertRebelBase(rebelDTO.getRebelBase());
+        RebelBaseDTO savedRebelBaseDTO = insertOrGetRebelBase(rebelDTO.getRebelBase());
         rebelDTO.setRebelBase(savedRebelBaseDTO);
 
         try {

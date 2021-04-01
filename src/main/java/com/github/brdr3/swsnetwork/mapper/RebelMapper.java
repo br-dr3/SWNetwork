@@ -13,6 +13,7 @@ public class RebelMapper {
     public static RebelBaseDTO toRebelBaseDTO(RebelBase rebelBase) {
         return RebelBaseDTO.builder()
                 .id(rebelBase.getId())
+                .name(rebelBase.getName())
                 .latitude(rebelBase.getLatitude())
                 .longitude(rebelBase.getLongitude())
                 .build();
@@ -32,6 +33,7 @@ public class RebelMapper {
     public static RebelBase toRebelBase(RebelBaseDTO rebelBase) {
         return RebelBase.builder()
                 .id(rebelBase.getId())
+                .name(rebelBase.getName())
                 .latitude(rebelBase.getLatitude())
                 .longitude(rebelBase.getLongitude())
                 .build();

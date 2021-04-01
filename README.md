@@ -1,8 +1,8 @@
 # Star Wars Social Network
 
 ## How to Run Project
-After cloned, you should execute sh/runDev.sh (if you are using a Shell based SO),
-or just execute
+After cloned, you should execute `sh/runDev.sh` (if you are using a Shell based SO), you may want to give permission 
+to it by running `chmod 755 sh/runDev.sh`. If you are using other SO, just execute the following: 
 
 ```
 mvn clean install

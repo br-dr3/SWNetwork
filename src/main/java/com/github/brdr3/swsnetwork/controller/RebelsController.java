@@ -40,7 +40,7 @@ public class RebelsController {
     public ResponseEntity<?> getRebel(@PathVariable UUID id) {
         RebelDTO rebelDTO = this.rebelsService.getRebel(id);
         if(rebelDTO != null) {
-            return new ResponseEntity<>(rebelDTO, HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(rebelDTO, HttpStatus.OK);
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find any rebel with id '" + id.toString() + "'");
@@ -50,7 +50,7 @@ public class RebelsController {
     public ResponseEntity<?> getRebel(@PathVariable String name) {
         RebelDTO rebelDTO = this.rebelsService.getRebelByName(name);
         if(rebelDTO != null) {
-            return new ResponseEntity<>(rebelDTO, HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(rebelDTO, HttpStatus.OK);
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find any rebel with name '" + name + "'");

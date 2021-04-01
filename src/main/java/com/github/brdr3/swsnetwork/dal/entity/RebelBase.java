@@ -29,6 +29,9 @@ public class RebelBase {
     @Column(name = "rebel_base_id", updatable = false, nullable = false)
     private UUID id;
 
+    @Column(unique = true)
+    private String name;
+
     private float latitude;
     private float longitude;
 }
