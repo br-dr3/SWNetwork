@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface RebelBasesRepository extends JpaRepository<RebelBase, UUID> {
     @Query("SELECT rb FROM RebelBase rb WHERE rb.latitude = :latitude AND rb.longitude = :longitude")
-    RebelBase findByUniqueKey(@Param("latitude") float latitude, @Param("longitude") float longitude);
+    RebelBase findByUniqueKey(@Param("latitude") Float latitude, @Param("longitude") Float longitude);
 
     @Query("SELECT rb FROM RebelBase rb WHERE rb.name = :name")
     RebelBase findByUniqueKey(@Param("name") String name);

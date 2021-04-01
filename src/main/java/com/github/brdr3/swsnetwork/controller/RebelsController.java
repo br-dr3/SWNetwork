@@ -1,5 +1,6 @@
 package com.github.brdr3.swsnetwork.controller;
 
+import com.github.brdr3.swsnetwork.dto.RebelBaseDTO;
 import com.github.brdr3.swsnetwork.dto.RebelDTO;
 import com.github.brdr3.swsnetwork.service.RebelsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -54,5 +56,15 @@ public class RebelsController {
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find any rebel with name '" + name + "'");
+    }
+
+    @PutMapping("/id/{id}/rebelBase/update/")
+    public ResponseEntity<?> updateRebelBase(@PathVariable UUID id, @RequestBody RebelBaseDTO rebelBase) {
+        try {
+            RebelDTO rebelDTO = this.rebelsService.updateRebelBase(id, rebelBase);
+            return new ResponseEntity<>(rebelDTO, HttpStatus.OK);
+        } catch(Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }

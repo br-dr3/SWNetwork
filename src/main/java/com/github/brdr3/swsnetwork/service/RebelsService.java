@@ -25,17 +25,27 @@ public class RebelsService {
         this.rebelBasesRepository = rbr;
     }
 
-    public RebelBaseDTO insertOrGetRebelBase(RebelBaseDTO rebelBaseDTO) {
+    public RebelBaseDTO insertOrGetRebelBase(RebelBaseDTO rebelBaseDTO) throws Exception {
         try {
             RebelBase savedRebelBase = rebelBasesRepository.save(RebelMapper.toRebelBase(rebelBaseDTO));
             return RebelMapper.toRebelBaseDTO(savedRebelBase);
-        } catch (DataIntegrityViolationException e) {
-            RebelBase rebelBase = rebelBasesRepository.findByUniqueKey(rebelBaseDTO.getLatitude(), rebelBaseDTO.getLongitude());
-            if(rebelBase == null) {
-                rebelBase = rebelBasesRepository.findByUniqueKey(rebelBaseDTO.getName());
+        } catch (Exception e) {
+            RebelBase rebelBaseByLatitudeAndLongitude = rebelBasesRepository.findByUniqueKey(rebelBaseDTO.getLatitude(),
+                    rebelBaseDTO.getLongitude());
+            RebelBase rebelBaseByName = rebelBasesRepository.findByUniqueKey(rebelBaseDTO.getName());
+
+            if (rebelBaseByLatitudeAndLongitude == null && rebelBaseByName == null) {
+                throw new Exception("Missing arguments to insert new Rebel Base and could not find any base with this attributes");
             }
 
-            return RebelMapper.toRebelBaseDTO(rebelBase);
+            if (rebelBaseByLatitudeAndLongitude != null && rebelBaseByName != null
+                    && !rebelBaseByName.equals(rebelBaseByLatitudeAndLongitude)) {
+                throw new Exception("Arguments maps to 2 distinct Rebel Bases");
+            }
+
+            return rebelBaseByLatitudeAndLongitude == null ?
+                    RebelMapper.toRebelBaseDTO(rebelBaseByName) :
+                    RebelMapper.toRebelBaseDTO(rebelBaseByLatitudeAndLongitude);
         }
     }
 
@@ -46,7 +56,7 @@ public class RebelsService {
         try {
             Rebel savedRebel = rebelsRepository.save(RebelMapper.toRebel(rebelDTO));
             return RebelMapper.toRebelDTO(savedRebel);
-        } catch(DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new Exception("Could not insert rebel on base. Maybe rebel already exist or its inventory has duplicated items");
         }
 
@@ -66,7 +76,21 @@ public class RebelsService {
             Rebel rebel = rebelsRepository.findByUniqueKey(name);
             return RebelMapper.toRebelDTO(rebel);
         } catch (EntityNotFoundException e) {
-             return null;
+            return null;
+        }
+    }
+
+    public RebelDTO updateRebelBase(UUID id, RebelBaseDTO rebelBaseDTO) throws Exception {
+        RebelBaseDTO savedRebelBaseDTO = this.insertOrGetRebelBase(rebelBaseDTO);
+
+        try {
+            RebelDTO rebelDTO = this.getRebel(id);
+            rebelDTO.setRebelBase(savedRebelBaseDTO);
+            Rebel updatedRebel = this.rebelsRepository.save(RebelMapper.toRebel(rebelDTO));
+
+            return RebelMapper.toRebelDTO(updatedRebel);
+        } catch (Exception e) {
+            throw new Exception("Could not find rebel with id '" + id + "'");
         }
     }
 }
