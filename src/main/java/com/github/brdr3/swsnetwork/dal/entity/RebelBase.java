@@ -26,7 +26,7 @@ public class RebelBase {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(updatable = false, nullable = false)
+    @Column(name = "rebel_base_id", updatable = false, nullable = false)
     private UUID id;
 
     private float latitude;

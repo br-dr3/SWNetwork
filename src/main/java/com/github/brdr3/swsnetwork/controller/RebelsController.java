@@ -26,13 +26,13 @@ public class RebelsController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<?> insertRebel(@RequestBody RebelDTO rebel) {
-        try {
+    public ResponseEntity<?> insertRebel(@RequestBody RebelDTO rebel) throws Exception {
+         try {
             RebelDTO rebelDTO = this.rebelsService.insertRebel(rebel);
             return new ResponseEntity<>(rebelDTO, HttpStatus.CREATED);
-        } catch (Exception e) {
+         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
-        }
+         }
 
     }
 

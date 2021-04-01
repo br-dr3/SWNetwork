@@ -38,11 +38,12 @@ public class RebelsService {
     public RebelDTO insertRebel(RebelDTO rebelDTO) throws Exception {
         RebelBaseDTO savedRebelBaseDTO = insertRebelBase(rebelDTO.getRebelBase());
         rebelDTO.setRebelBase(savedRebelBaseDTO);
+
         try {
             Rebel savedRebel = rebelsRepository.save(RebelMapper.toRebel(rebelDTO));
             return RebelMapper.toRebelDTO(savedRebel);
         } catch(DataIntegrityViolationException e) {
-            throw new Exception("Rebel '" + rebelDTO.getName() + "' already exists on database");
+            throw new Exception("Could not insert rebel on base. Maybe rebel already exist or its inventory has duplicated items");
         }
 
     }

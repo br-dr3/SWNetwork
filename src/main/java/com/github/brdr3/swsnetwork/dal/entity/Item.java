@@ -10,41 +10,33 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.util.UUID;
 
 @Entity
-@Builder
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Rebel {
+@Setter
+@Getter
+@Builder
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "rebel_id"}))
+public class Item {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "rebel_id", updatable = false, nullable = false)
+    @Column(name = "item_id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(unique = true)
     private String name;
 
-    private Date birthDate;
+    private int quantity;
 
-    @Enumerated(EnumType.ORDINAL)
-    private Gender gender;
-
-    @ManyToOne
-    private RebelBase rebelBase;
-
-    @OneToMany(targetEntity = Item.class, cascade = CascadeType.ALL)
-    private List<Item> inventory = new ArrayList<>(0);
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "rebel_id")
+    private Rebel rebel;
 }
