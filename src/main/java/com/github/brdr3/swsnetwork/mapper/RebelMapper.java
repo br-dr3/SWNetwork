@@ -1,10 +1,13 @@
 package com.github.brdr3.swsnetwork.mapper;
 
 import com.github.brdr3.swsnetwork.dal.entity.Gender;
+import com.github.brdr3.swsnetwork.dal.entity.Item;
 import com.github.brdr3.swsnetwork.dal.entity.Rebel;
 import com.github.brdr3.swsnetwork.dal.entity.RebelBase;
 import com.github.brdr3.swsnetwork.dto.RebelBaseDTO;
 import com.github.brdr3.swsnetwork.dto.RebelDTO;
+
+import java.util.List;
 
 public class RebelMapper {
     public static RebelBaseDTO toRebelBaseDTO(RebelBase rebelBase) {
@@ -22,6 +25,7 @@ public class RebelMapper {
                 .birthDate(rebel.getBirthDate())
                 .gender(rebel.getGender().toString())
                 .rebelBase(toRebelBaseDTO(rebel.getRebelBase()))
+                .inventory(InventoryMapper.toItemDTOList(rebel.getInventory()))
                 .build();
     }
 
@@ -33,14 +37,19 @@ public class RebelMapper {
                 .build();
     }
 
-    public static Rebel toRebel(RebelDTO rebel) {
-        return Rebel.builder()
-                .id(null)
-                .name(rebel.getName())
-                .birthDate(rebel.getBirthDate())
-                .gender(Gender.toGender(rebel.getGender()))
-                .rebelBase(toRebelBase(rebel.getRebelBase()))
+    public static Rebel toRebel(RebelDTO rebelDTO) {
+        Rebel rebel = Rebel.builder()
+                .id(rebelDTO.getId())
+                .name(rebelDTO.getName())
+                .birthDate(rebelDTO.getBirthDate())
+                .gender(Gender.toGender(rebelDTO.getGender()))
+                .rebelBase(toRebelBase(rebelDTO.getRebelBase()))
                 .build();
+
+        List<Item> inventory = InventoryMapper.toItemList(rebelDTO.getInventory(), rebel);
+        rebel.setInventory(inventory);
+
+        return rebel;
     }
 
 }
