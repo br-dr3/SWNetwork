@@ -30,7 +30,9 @@ public class Rebel {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
+    @Column(unique = true)
     private String name;
+
     private Date birthDate;
 
     @Enumerated(EnumType.ORDINAL)

@@ -26,12 +26,17 @@ public class RebelsController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<RebelDTO> insertRebel(@RequestBody RebelDTO rebel) {
-        RebelDTO rebelDTO = this.rebelsService.insertRebel(rebel);
-        return new ResponseEntity<>(rebelDTO, HttpStatus.CREATED);
+    public ResponseEntity<?> insertRebel(@RequestBody RebelDTO rebel) {
+        try {
+            RebelDTO rebelDTO = this.rebelsService.insertRebel(rebel);
+            return new ResponseEntity<>(rebelDTO, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
+        }
+
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<?> getRebel(@PathVariable UUID id) {
         RebelDTO rebelDTO = this.rebelsService.getRebel(id);
         if(rebelDTO != null) {
@@ -39,5 +44,15 @@ public class RebelsController {
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find any rebel with id '" + id.toString() + "'");
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<?> getRebel(@PathVariable String name) {
+        RebelDTO rebelDTO = this.rebelsService.getRebelByName(name);
+        if(rebelDTO != null) {
+            return new ResponseEntity<>(rebelDTO, HttpStatus.ACCEPTED);
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find any rebel with name '" + name + "'");
     }
 }
