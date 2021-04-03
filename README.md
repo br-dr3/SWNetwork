@@ -7,7 +7,9 @@ to it by running `chmod 755 sh/runDev.sh`. If you are using other SO, just execu
 ```
 mvn clean install
 docker build -t swsnetwork .
-docker run -p 8080:8080 swsnetwork:latest
+docker run -p 8080:8080 -p 5005:5005 swsnetwork:latest
 ```
 
-You should be capable of use `localhost:8080/swagger` to see available endpoints
+You should be capable of use `localhost:8080/swagger` to see available endpoints, 
+or debug attaching debugger to `localhost:5005`.
+

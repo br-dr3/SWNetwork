@@ -13,7 +13,7 @@ public class SWSNConfigController {
     }
 
     @GetMapping("/swagger")
-    public RedirectView redirectWithUsingRedirectView(RedirectAttributes attributes) {
+    public RedirectView redirectSwagger(RedirectAttributes attributes) {
         return new RedirectView("/swagger-ui/");
     }
 }

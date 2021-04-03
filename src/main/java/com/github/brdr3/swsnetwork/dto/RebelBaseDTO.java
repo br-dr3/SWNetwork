@@ -12,6 +12,6 @@ import java.util.UUID;
 public class RebelBaseDTO {
     private UUID id;
     private String name;
-    private float latitude;
-    private float longitude;
+    private Float latitude;
+    private Float longitude;
 }
