@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.CascadeType;
@@ -38,6 +39,9 @@ public class Rebel {
     private String name;
 
     private Date birthDate;
+
+    @ColumnDefault("false")
+    private boolean betrayal;
 
     @Enumerated(EnumType.ORDINAL)
     private Gender gender;

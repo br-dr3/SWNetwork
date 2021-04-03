@@ -25,6 +25,7 @@ public class RebelMapper {
                 .name(rebel.getName())
                 .birthDate(rebel.getBirthDate())
                 .gender(rebel.getGender().toString())
+                .betrayal(rebel.isBetrayal())
                 .rebelBase(toRebelBaseDTO(rebel.getRebelBase()))
                 .inventory(InventoryMapper.toItemDTOList(rebel.getInventory()))
                 .build();
@@ -45,6 +46,7 @@ public class RebelMapper {
                 .name(rebelDTO.getName())
                 .birthDate(rebelDTO.getBirthDate())
                 .gender(Gender.toGender(rebelDTO.getGender()))
+                .betrayal(rebelDTO.isBetrayal())
                 .rebelBase(toRebelBase(rebelDTO.getRebelBase()))
                 .build();
 
