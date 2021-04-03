@@ -2,6 +2,7 @@ package com.github.brdr3.swsnetwork.controller;
 
 import com.github.brdr3.swsnetwork.dto.RebelBaseDTO;
 import com.github.brdr3.swsnetwork.dto.RebelDTO;
+import com.github.brdr3.swsnetwork.dto.ReportBetrayalDTO;
 import com.github.brdr3.swsnetwork.service.RebelsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,29 +30,30 @@ public class RebelsController {
 
     @PostMapping("/")
     public ResponseEntity<?> insertRebel(@RequestBody RebelDTO rebel) throws Exception {
-         try {
+        try {
             RebelDTO rebelDTO = this.rebelsService.insertRebel(rebel);
             return new ResponseEntity<>(rebelDTO, HttpStatus.CREATED);
-         } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
-         }
+        }
 
     }
 
     @GetMapping("/id/{id}")
     public ResponseEntity<?> getRebel(@PathVariable UUID id) {
         RebelDTO rebelDTO = this.rebelsService.getRebel(id);
-        if(rebelDTO != null) {
+        if (rebelDTO != null) {
             return new ResponseEntity<>(rebelDTO, HttpStatus.OK);
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find any rebel with id '" + id.toString() + "'");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                             .body("Could not find any rebel with id '" + id.toString() + "'");
     }
 
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getRebel(@PathVariable String name) {
         RebelDTO rebelDTO = this.rebelsService.getRebelByName(name);
-        if(rebelDTO != null) {
+        if (rebelDTO != null) {
             return new ResponseEntity<>(rebelDTO, HttpStatus.OK);
         }
 
@@ -63,8 +65,18 @@ public class RebelsController {
         try {
             RebelDTO rebelDTO = this.rebelsService.updateRebelBase(id, rebelBase);
             return new ResponseEntity<>(rebelDTO, HttpStatus.OK);
-        } catch(Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reportBetrayal")
+    public ResponseEntity<?> reportBetrayal(@RequestBody ReportBetrayalDTO reportBetrayal) {
+        try {
+            ReportBetrayalDTO reportBetrayalDTO = this.rebelsService.reportBetrayal(reportBetrayal);
+            return new ResponseEntity<>(reportBetrayalDTO, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
         }
     }
 }

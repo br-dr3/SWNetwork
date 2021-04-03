@@ -8,18 +8,15 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import java.util.ArrayList;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -28,27 +25,24 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Rebel {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"reporter_rebel_id", "reported_rebel_id"}))
+public class BetrayalReport {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "rebel_id", updatable = false, nullable = false)
+    @Column(name = "betrayer_report_id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(unique = true)
-    private String name;
-
-    private Date birthDate;
-
-    @ColumnDefault("false")
-    private boolean betrayal;
-
-    @Enumerated(EnumType.ORDINAL)
-    private Gender gender;
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "created_at")
+    private Date createdAt;
 
     @ManyToOne
-    private RebelBase rebelBase;
+    @JoinColumn(name = "reporter_rebel_id")
+    private Rebel reporter;
 
-    @OneToMany(targetEntity = Item.class, cascade = CascadeType.ALL)
-    private List<Item> inventory = new ArrayList<>(0);
+    @ManyToOne
+    @JoinColumn(name = "reported_rebel_id")
+    private Rebel reported;
+
 }

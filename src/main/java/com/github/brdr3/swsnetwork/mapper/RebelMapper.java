@@ -12,41 +12,43 @@ import java.util.List;
 public class RebelMapper {
     public static RebelBaseDTO toRebelBaseDTO(RebelBase rebelBase) {
         return RebelBaseDTO.builder()
-                .id(rebelBase.getId())
-                .name(rebelBase.getName())
-                .latitude(rebelBase.getLatitude())
-                .longitude(rebelBase.getLongitude())
-                .build();
+                           .id(rebelBase.getId())
+                           .name(rebelBase.getName())
+                           .latitude(rebelBase.getLatitude())
+                           .longitude(rebelBase.getLongitude())
+                           .build();
     }
 
     public static RebelDTO toRebelDTO(Rebel rebel) {
         return RebelDTO.builder()
-                .id(rebel.getId())
-                .name(rebel.getName())
-                .birthDate(rebel.getBirthDate())
-                .gender(rebel.getGender().toString())
-                .rebelBase(toRebelBaseDTO(rebel.getRebelBase()))
-                .inventory(InventoryMapper.toItemDTOList(rebel.getInventory()))
-                .build();
+                       .id(rebel.getId())
+                       .name(rebel.getName())
+                       .birthDate(rebel.getBirthDate())
+                       .gender(rebel.getGender().toString())
+                       .betrayal(rebel.isBetrayal())
+                       .rebelBase(toRebelBaseDTO(rebel.getRebelBase()))
+                       .inventory(InventoryMapper.toItemDTOList(rebel.getInventory()))
+                       .build();
     }
 
     public static RebelBase toRebelBase(RebelBaseDTO rebelBase) {
         return RebelBase.builder()
-                .id(rebelBase.getId())
-                .name(rebelBase.getName())
-                .latitude(rebelBase.getLatitude())
-                .longitude(rebelBase.getLongitude())
-                .build();
+                        .id(rebelBase.getId())
+                        .name(rebelBase.getName())
+                        .latitude(rebelBase.getLatitude())
+                        .longitude(rebelBase.getLongitude())
+                        .build();
     }
 
     public static Rebel toRebel(RebelDTO rebelDTO) {
         Rebel rebel = Rebel.builder()
-                .id(rebelDTO.getId())
-                .name(rebelDTO.getName())
-                .birthDate(rebelDTO.getBirthDate())
-                .gender(Gender.toGender(rebelDTO.getGender()))
-                .rebelBase(toRebelBase(rebelDTO.getRebelBase()))
-                .build();
+                           .id(rebelDTO.getId())
+                           .name(rebelDTO.getName())
+                           .birthDate(rebelDTO.getBirthDate())
+                           .gender(Gender.toGender(rebelDTO.getGender()))
+                           .betrayal(rebelDTO.isBetrayal())
+                           .rebelBase(toRebelBase(rebelDTO.getRebelBase()))
+                           .build();
 
         List<Item> inventory = InventoryMapper.toItemList(rebelDTO.getInventory(), rebel);
         rebel.setInventory(inventory);

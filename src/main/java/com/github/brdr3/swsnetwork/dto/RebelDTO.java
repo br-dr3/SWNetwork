@@ -17,6 +17,7 @@ public class RebelDTO {
     private String name;
     private Date birthDate;
     private String gender;
+    private boolean betrayal;
     private RebelBaseDTO rebelBase;
     private List<ItemDTO> inventory;
 }
