@@ -5,9 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class StarWarsSocialNetworkApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(StarWarsSocialNetworkApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(StarWarsSocialNetworkApplication.class, args);
+    }
 }

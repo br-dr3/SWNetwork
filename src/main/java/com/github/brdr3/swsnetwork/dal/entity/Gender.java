@@ -11,10 +11,14 @@ public enum Gender {
 
     public static Gender toGender(String name) {
         switch (name) {
-            case "Male": return Gender.MALE;
-            case "Female": return Gender.FEMALE;
-            case "Not defined": return Gender.NOT_DEFINED;
-            default: return null;
+            case "Male":
+                return Gender.MALE;
+            case "Female":
+                return Gender.FEMALE;
+            case "Not defined":
+                return Gender.NOT_DEFINED;
+            default:
+                return null;
         }
     }
 

@@ -25,12 +25,11 @@ import java.util.UUID;
 @PropertySource("classpath:application.properties")
 @Service
 public class RebelsService {
-    @Value("${REPORTS_TO_CONSIDER_BETRAYAL}")
-    private int REPORTS_TO_CONSIDER_BETRAYAL;
-
     private final RebelsRepository rebelsRepository;
     private final RebelBasesRepository rebelBasesRepository;
     private final BetrayalReportRepository betrayalReportRepository;
+    @Value("${REPORTS_TO_CONSIDER_BETRAYAL}")
+    private int REPORTS_TO_CONSIDER_BETRAYAL;
 
     @Autowired
     public RebelsService(RebelsRepository rr, RebelBasesRepository rbr, BetrayalReportRepository brr) {
@@ -42,16 +41,15 @@ public class RebelsService {
     public RebelBaseDTO insertOrGetRebelBase(RebelBaseDTO rebelBaseDTO) throws Exception {
         RebelBase rebelBase = null;
 
-        if (rebelBaseDTO.getName() != null
-                && rebelBaseDTO.getLatitude() != null
-                && rebelBaseDTO.getLongitude() != null) {
+        if (rebelBaseDTO.getName() != null && rebelBaseDTO.getLatitude() != null &&
+            rebelBaseDTO.getLongitude() != null) {
             return this.insertOrGetRebelBase(rebelBaseDTO.getName(), rebelBaseDTO.getLatitude(),
-                    rebelBaseDTO.getLongitude());
+                    rebelBaseDTO.getLongitude()
+            );
         }
 
-        if (rebelBaseDTO.getName() == null
-                && rebelBaseDTO.getLatitude() == null
-                && rebelBaseDTO.getLongitude() == null) {
+        if (rebelBaseDTO.getName() == null && rebelBaseDTO.getLatitude() == null &&
+            rebelBaseDTO.getLongitude() == null) {
             throw new Exception("No argument was provided to get Rebel Base");
         }
 
@@ -65,7 +63,7 @@ public class RebelsService {
 
         if (rebelBase == null) {
             throw new Exception("Missing arguments to insert new Rebel Base and could not find any base with given " +
-                    "attributes");
+                                "attributes");
         }
 
         return RebelMapper.toRebelBaseDTO(rebelBase);
@@ -80,7 +78,7 @@ public class RebelsService {
             return RebelMapper.toRebelDTO(savedRebel);
         } catch (DataIntegrityViolationException e) {
             throw new Exception("Could not insert rebel on base. Maybe rebel already exist or its inventory has " +
-                    "duplicated items");
+                                "duplicated items");
         }
 
     }
@@ -130,9 +128,8 @@ public class RebelsService {
             throw new Exception("Could not get reported rebel using parameters provided");
         }
 
-        BetrayalReport savedBetrayalReport =
-                betrayalReportRepository.saveAndFlush(ReportBetrayalMapper.toBetrayalReport(reportBetrayalDTO,
-                        reporter, reported));
+        BetrayalReport savedBetrayalReport = betrayalReportRepository.saveAndFlush(
+                ReportBetrayalMapper.toBetrayalReport(reportBetrayalDTO, reporter, reported));
         return this.verifyRebel(savedBetrayalReport);
     }
 

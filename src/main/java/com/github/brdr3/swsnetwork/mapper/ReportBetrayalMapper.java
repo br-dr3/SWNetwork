@@ -10,19 +10,19 @@ public class ReportBetrayalMapper {
     public static BetrayalReport toBetrayalReport(ReportBetrayalDTO rb, RebelDTO reporter, RebelDTO reported) {
         Date createdAt = rb.getCreatedAt();
         return BetrayalReport.builder()
-                .id(rb.getId())
-                .createdAt(createdAt == null ? new Date() : createdAt)
-                .reporter(RebelMapper.toRebel(reporter))
-                .reported(RebelMapper.toRebel(reported))
-                .build();
+                             .id(rb.getId())
+                             .createdAt(createdAt == null ? new Date() : createdAt)
+                             .reporter(RebelMapper.toRebel(reporter))
+                             .reported(RebelMapper.toRebel(reported))
+                             .build();
     }
 
     public static ReportBetrayalDTO toReportBetrayalDTO(BetrayalReport br) {
         return ReportBetrayalDTO.builder()
-                .id(br.getId())
-                .createdAt(br.getCreatedAt())
-                .reporter(br.getReporter().getId())
-                .reported(br.getReported().getId())
-                .build();
+                                .id(br.getId())
+                                .createdAt(br.getCreatedAt())
+                                .reporter(br.getReporter().getId())
+                                .reported(br.getReported().getId())
+                                .build();
     }
 }
