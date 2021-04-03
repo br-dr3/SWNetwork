@@ -2,6 +2,7 @@ package com.github.brdr3.swsnetwork.controller;
 
 import com.github.brdr3.swsnetwork.dto.RebelBaseDTO;
 import com.github.brdr3.swsnetwork.dto.RebelDTO;
+import com.github.brdr3.swsnetwork.dto.ReportBetrayalDTO;
 import com.github.brdr3.swsnetwork.service.RebelsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,16 @@ public class RebelsController {
             return new ResponseEntity<>(rebelDTO, HttpStatus.OK);
         } catch(Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reportBetrayal")
+    public ResponseEntity<?> reportBetrayal(@RequestBody ReportBetrayalDTO reportBetrayal) {
+        try {
+            ReportBetrayalDTO reportBetrayalDTO = this.rebelsService.reportBetrayal(reportBetrayal);
+            return new ResponseEntity<>(reportBetrayalDTO, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
         }
     }
 }
