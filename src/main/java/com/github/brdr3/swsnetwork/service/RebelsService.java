@@ -7,6 +7,7 @@ import com.github.brdr3.swsnetwork.dal.repository.RebelsRepository;
 import com.github.brdr3.swsnetwork.dto.RebelBaseDTO;
 import com.github.brdr3.swsnetwork.dto.RebelDTO;
 import com.github.brdr3.swsnetwork.mapper.RebelMapper;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class RebelsService {
     private final RebelsRepository rebelsRepository;
     private final RebelBasesRepository rebelBasesRepository;
+    private final Gson gson = new Gson();
 
     @Autowired
     public RebelsService(RebelsRepository rr, RebelBasesRepository rbr) {
@@ -38,8 +40,15 @@ public class RebelsService {
                 throw new Exception("Missing arguments to insert new Rebel Base and could not find any base with this attributes");
             }
 
-            if (rebelBaseByLatitudeAndLongitude != null && rebelBaseByName != null
-                    && !rebelBaseByName.equals(rebelBaseByLatitudeAndLongitude)) {
+            boolean rebelBasesAreNotSame = rebelBaseByName != null
+                    && rebelBaseByLatitudeAndLongitude != null
+                    && !rebelBaseByName.equals(rebelBaseByLatitudeAndLongitude);
+
+            boolean latitudeAndLongitudeMatchNamedRebelBase = rebelBaseByName != null
+                    && rebelBaseByName.getLatitude() == rebelBaseDTO.getLatitude()
+                    && rebelBaseByName.getLongitude() == rebelBaseDTO.getLongitude();
+
+            if (rebelBasesAreNotSame || !latitudeAndLongitudeMatchNamedRebelBase) {
                 throw new Exception("Arguments maps to 2 distinct Rebel Bases");
             }
 
