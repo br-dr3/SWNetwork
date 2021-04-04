@@ -1,11 +1,18 @@
 package com.github.brdr3.swsnetwork.service;
 
-import com.github.brdr3.swsnetwork.dal.entity.*;
+import com.github.brdr3.swsnetwork.dal.entity.BetrayalReport;
+import com.github.brdr3.swsnetwork.dal.entity.Item;
+import com.github.brdr3.swsnetwork.dal.entity.ItemPossession;
+import com.github.brdr3.swsnetwork.dal.entity.Rebel;
+import com.github.brdr3.swsnetwork.dal.entity.RebelBase;
 import com.github.brdr3.swsnetwork.dal.repository.BetrayalReportRepository;
 import com.github.brdr3.swsnetwork.dal.repository.InventoryRepository;
 import com.github.brdr3.swsnetwork.dal.repository.RebelBasesRepository;
 import com.github.brdr3.swsnetwork.dal.repository.RebelsRepository;
-import com.github.brdr3.swsnetwork.dto.*;
+import com.github.brdr3.swsnetwork.dto.NegotiateItemsDTO;
+import com.github.brdr3.swsnetwork.dto.RebelBaseDTO;
+import com.github.brdr3.swsnetwork.dto.RebelDTO;
+import com.github.brdr3.swsnetwork.dto.ReportBetrayalDTO;
 import com.github.brdr3.swsnetwork.mapper.RebelMapper;
 import com.github.brdr3.swsnetwork.mapper.ReportBetrayalMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +21,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -144,22 +155,22 @@ public class RebelsService {
         Rebel secondRebel = rebelsRepository.getOne(negotiation.getSecondRebel());
         validateRebel(secondRebel);
 
-        validateRebelItems(firstRebel, negotiation.getFirstRebelItems().getItemsAndQuantities());
-        validateRebelItems(secondRebel, negotiation.getSecondRebelItems().getItemsAndQuantities());
+        validateRebelItems(firstRebel, negotiation.getFirstRebelItems());
+        validateRebelItems(secondRebel, negotiation.getSecondRebelItems());
 
         validatePoints(
-                negotiation.getFirstRebelItems().getItemsAndQuantities(),
-                negotiation.getSecondRebelItems().getItemsAndQuantities()
+                negotiation.getFirstRebelItems(),
+                negotiation.getSecondRebelItems()
         );
 
 
         Map<Item, Integer> resultantFirstRebelItems =
-                calculateResultantExchangeItems(negotiation.getFirstRebelItems().getItemsAndQuantities(),
-                        negotiation.getSecondRebelItems().getItemsAndQuantities());
+                calculateResultantExchangeItems(negotiation.getFirstRebelItems(),
+                        negotiation.getSecondRebelItems());
 
         Map<Item, Integer> resultantSecondRebelItems =
-                calculateResultantExchangeItems(negotiation.getSecondRebelItems().getItemsAndQuantities(),
-                        negotiation.getFirstRebelItems().getItemsAndQuantities());
+                calculateResultantExchangeItems(negotiation.getSecondRebelItems(),
+                        negotiation.getFirstRebelItems());
 
         applyNegotiation(firstRebel, resultantFirstRebelItems,
                 secondRebel, resultantSecondRebelItems
@@ -197,13 +208,28 @@ public class RebelsService {
     private Map<Item, Integer> calculateInventoryAfterGiveItems(Rebel rebel, Map<String, Integer> items) {
         Map<Item, Integer> enumItems = toMapOfItem(items);
 
-        List<ItemPossession> rebelItems = inventoryRepository.getRebelItems(rebel);
+        List<ItemPossession> rebelItemsPossession = inventoryRepository.getRebelItems(rebel);
+        List<Item> rebelItems = rebelItemsPossession.stream()
+                .map(ItemPossession::getItem)
+                .collect(Collectors.toList());
 
-        return rebelItems.stream()
+        Map<Item, Integer> rebelFinalPossessions = rebelItemsPossession.stream()
                 .collect(Collectors.toMap(
                         ItemPossession::getItem,
-                        i -> i.getQuantity() - enumItems.get(i.getItem())
+                        i -> enumItems.containsKey(i.getItem()) ?
+                                i.getQuantity() - enumItems.get(i.getItem()) : i.getQuantity()
                 ));
+
+        Map<Item, Integer> negativeItems = enumItems.entrySet()
+                .stream()
+                .filter(i -> !rebelItems.contains(i.getKey()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        i -> -i.getValue()
+                ));
+
+        return Stream.concat(rebelFinalPossessions.entrySet().stream(), negativeItems.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private void validateRebelItems(Rebel rebel, Map<String, Integer> rebelItems) throws Exception {
