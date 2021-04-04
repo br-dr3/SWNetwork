@@ -25,11 +25,11 @@ import java.util.UUID;
 @Getter
 @Builder
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "rebel_id"}))
-public class Item {
+public class ItemPossession {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "item_id", updatable = false, nullable = false)
+    @Column(name = "item_possession_id", updatable = false, nullable = false)
     private UUID id;
 
     private String name;

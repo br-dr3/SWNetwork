@@ -1,7 +1,7 @@
 package com.github.brdr3.swsnetwork.mapper;
 
 import com.github.brdr3.swsnetwork.dal.entity.Gender;
-import com.github.brdr3.swsnetwork.dal.entity.Item;
+import com.github.brdr3.swsnetwork.dal.entity.ItemPossession;
 import com.github.brdr3.swsnetwork.dal.entity.Rebel;
 import com.github.brdr3.swsnetwork.dal.entity.RebelBase;
 import com.github.brdr3.swsnetwork.dto.RebelBaseDTO;
@@ -50,7 +50,7 @@ public class RebelMapper {
                            .rebelBase(toRebelBase(rebelDTO.getRebelBase()))
                            .build();
 
-        List<Item> inventory = InventoryMapper.toItemList(rebelDTO.getInventory(), rebel);
+        List<ItemPossession> inventory = InventoryMapper.toItemPossessionList(rebelDTO.getInventory(), rebel);
         rebel.setInventory(inventory);
 
         return rebel;

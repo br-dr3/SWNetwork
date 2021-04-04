@@ -49,6 +49,6 @@ public class Rebel {
     @ManyToOne
     private RebelBase rebelBase;
 
-    @OneToMany(targetEntity = Item.class, cascade = CascadeType.ALL)
-    private List<Item> inventory = new ArrayList<>(0);
+    @OneToMany(targetEntity = ItemPossession.class, cascade = CascadeType.ALL)
+    private List<ItemPossession> inventory = new ArrayList<>(0);
 }

@@ -19,7 +19,7 @@ public class RebelDTO {
     private String gender;
     private boolean betrayal;
     private RebelBaseDTO rebelBase;
-    private List<ItemDTO> inventory;
+    private List<ItemPossessionDTO> inventory;
 }
 
 
