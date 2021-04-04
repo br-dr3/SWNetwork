@@ -1,26 +1,42 @@
 package com.github.brdr3.swsnetwork.mapper;
 
 import com.github.brdr3.swsnetwork.dal.entity.Item;
+import com.github.brdr3.swsnetwork.dal.entity.ItemPossession;
 import com.github.brdr3.swsnetwork.dal.entity.Rebel;
-import com.github.brdr3.swsnetwork.dto.ItemDTO;
+import com.github.brdr3.swsnetwork.dto.ItemPossessionDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class InventoryMapper {
-    public static Item toItem(ItemDTO item, Rebel rebel) {
-        return Item.builder().id(item.getId()).name(item.getName()).quantity(item.getQuantity()).rebel(rebel).build();
+    public static ItemPossession toItemPossession(ItemPossessionDTO itemPossessionDTO, Rebel rebel) {
+        return ItemPossession.builder()
+                .id(itemPossessionDTO.getId())
+                .item(Item.toItem(itemPossessionDTO.getItem()))
+                .quantity(itemPossessionDTO.getQuantity())
+                .rebel(rebel)
+                .build();
     }
 
-    public static List<Item> toItemList(List<ItemDTO> inventory, Rebel rebel) {
-        return inventory.stream().map(itemDTO -> toItem(itemDTO, rebel)).collect(Collectors.toList());
+    public static List<ItemPossession> toItemPossessionList(List<ItemPossessionDTO> inventory, Rebel rebel) {
+        return inventory.stream()
+                .map(itemPossessionDTO -> toItemPossession(itemPossessionDTO, rebel))
+                .filter(itemPossessionDTO -> itemPossessionDTO.getQuantity() > 0)
+                .collect(Collectors.toList());
     }
 
-    public static ItemDTO toItemDTO(Item item) {
-        return ItemDTO.builder().id(item.getId()).name(item.getName()).quantity(item.getQuantity()).build();
+    public static ItemPossessionDTO toItemPossessionDTO(ItemPossession itemPossession) {
+        return ItemPossessionDTO.builder()
+                .id(itemPossession.getId())
+                .item(itemPossession.getItem().toString())
+                .quantity(itemPossession.getQuantity())
+                .build();
     }
 
-    public static List<ItemDTO> toItemDTOList(List<Item> inventory) {
-        return inventory.stream().map(InventoryMapper::toItemDTO).collect(Collectors.toList());
+    public static List<ItemPossessionDTO> toItemDTOList(List<ItemPossession> inventory) {
+        return inventory.stream()
+                .map(InventoryMapper::toItemPossessionDTO)
+                .filter(itemPossession -> itemPossession.getQuantity() > 0)
+                .collect(Collectors.toList());
     }
 }

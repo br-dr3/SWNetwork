@@ -1,5 +1,6 @@
 package com.github.brdr3.swsnetwork.controller;
 
+import com.github.brdr3.swsnetwork.dto.NegotiateItemsDTO;
 import com.github.brdr3.swsnetwork.dto.RebelBaseDTO;
 import com.github.brdr3.swsnetwork.dto.RebelDTO;
 import com.github.brdr3.swsnetwork.dto.ReportBetrayalDTO;
@@ -47,7 +48,7 @@ public class RebelsController {
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                             .body("Could not find any rebel with id '" + id.toString() + "'");
+                .body("Could not find any rebel with id '" + id.toString() + "'");
     }
 
     @GetMapping("/name/{name}")
@@ -75,6 +76,16 @@ public class RebelsController {
         try {
             ReportBetrayalDTO reportBetrayalDTO = this.rebelsService.reportBetrayal(reportBetrayal);
             return new ResponseEntity<>(reportBetrayalDTO, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/negotiateItems")
+    public ResponseEntity<?> negotiateItems(@RequestBody NegotiateItemsDTO negotiation) throws Exception {
+        try {
+            this.rebelsService.negotiateItems(negotiation);
+            return new ResponseEntity<>("Ok", HttpStatus.OK);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
         }
