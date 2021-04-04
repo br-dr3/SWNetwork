@@ -10,11 +10,11 @@ public enum Item {
     FOOD("Food", 1);
 
     private final String name;
-    private final int value;
+    private final int points;
 
     Item(String n, int v) {
         this.name = n;
-        this.value = v;
+        this.points = v;
     }
 
     public static Item toItem(String name) {

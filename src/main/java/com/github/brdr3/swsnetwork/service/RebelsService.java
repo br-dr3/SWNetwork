@@ -1,26 +1,22 @@
 package com.github.brdr3.swsnetwork.service;
 
-import com.github.brdr3.swsnetwork.dal.entity.BetrayalReport;
-import com.github.brdr3.swsnetwork.dal.entity.Rebel;
-import com.github.brdr3.swsnetwork.dal.entity.RebelBase;
+import com.github.brdr3.swsnetwork.dal.entity.*;
 import com.github.brdr3.swsnetwork.dal.repository.BetrayalReportRepository;
+import com.github.brdr3.swsnetwork.dal.repository.InventoryRepository;
 import com.github.brdr3.swsnetwork.dal.repository.RebelBasesRepository;
 import com.github.brdr3.swsnetwork.dal.repository.RebelsRepository;
-import com.github.brdr3.swsnetwork.dto.RebelBaseDTO;
-import com.github.brdr3.swsnetwork.dto.RebelDTO;
-import com.github.brdr3.swsnetwork.dto.ReportBetrayalDTO;
+import com.github.brdr3.swsnetwork.dto.*;
 import com.github.brdr3.swsnetwork.mapper.RebelMapper;
 import com.github.brdr3.swsnetwork.mapper.ReportBetrayalMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @PropertySource("classpath:application.properties")
 @Service
@@ -28,15 +24,18 @@ public class RebelsService {
     private final RebelsRepository rebelsRepository;
     private final RebelBasesRepository rebelBasesRepository;
     private final BetrayalReportRepository betrayalReportRepository;
+    private final InventoryRepository inventoryRepository;
 
     @Value("${REPORTS_TO_CONSIDER_BETRAYAL}")
     private int REPORTS_TO_CONSIDER_BETRAYAL;
 
     @Autowired
-    public RebelsService(RebelsRepository rr, RebelBasesRepository rbr, BetrayalReportRepository brr) {
+    public RebelsService(RebelsRepository rr, RebelBasesRepository rbr, BetrayalReportRepository brr,
+                         InventoryRepository ir) {
         this.rebelsRepository = rr;
         this.rebelBasesRepository = rbr;
         this.betrayalReportRepository = brr;
+        this.inventoryRepository = ir;
     }
 
     public RebelBaseDTO insertOrGetRebelBase(RebelBaseDTO rebelBaseDTO) throws Exception {
@@ -99,7 +98,7 @@ public class RebelsService {
     public RebelDTO getRebelByName(String name) {
         try {
             Rebel rebel = rebelsRepository.findByUniqueKey(name);
-            return rebel != null ? RebelMapper.toRebelDTO(rebel): null;
+            return rebel != null ? RebelMapper.toRebelDTO(rebel) : null;
         } catch (Exception e) {
             return null;
         }
@@ -136,6 +135,163 @@ public class RebelsService {
                 betrayalReportRepository.saveAndFlush(
                         ReportBetrayalMapper.toBetrayalReport(reportBetrayalDTO, reporter, reported));
         return this.verifyRebel(savedBetrayalReport);
+    }
+
+    public void negotiateItems(NegotiateItemsDTO negotiation) throws Exception {
+        Rebel firstRebel = rebelsRepository.getOne(negotiation.getFirstRebel());
+        validateRebel(firstRebel);
+
+        Rebel secondRebel = rebelsRepository.getOne(negotiation.getSecondRebel());
+        validateRebel(secondRebel);
+
+        validateRebelItems(firstRebel, negotiation.getFirstRebelItems().getItemsAndQuantities());
+        validateRebelItems(secondRebel, negotiation.getSecondRebelItems().getItemsAndQuantities());
+
+        validatePoints(
+                negotiation.getFirstRebelItems().getItemsAndQuantities(),
+                negotiation.getSecondRebelItems().getItemsAndQuantities()
+        );
+
+
+        Map<Item, Integer> resultantFirstRebelItems =
+                calculateResultantExchangeItems(negotiation.getFirstRebelItems().getItemsAndQuantities(),
+                        negotiation.getSecondRebelItems().getItemsAndQuantities());
+
+        Map<Item, Integer> resultantSecondRebelItems =
+                calculateResultantExchangeItems(negotiation.getSecondRebelItems().getItemsAndQuantities(),
+                        negotiation.getFirstRebelItems().getItemsAndQuantities());
+
+        applyNegotiation(firstRebel, resultantFirstRebelItems,
+                secondRebel, resultantSecondRebelItems
+        );
+    }
+
+    private Map<Item, Integer> calculateResultantExchangeItems(Map<String, Integer> givenRebelItems,
+                                                               Map<String, Integer> receivedRebelItems) {
+
+        Map<Item, Integer> enumGivenRebelItems = givenRebelItems.entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        i -> Item.toItem(i.getKey()), i -> -i.getValue()
+                ));
+
+        Map<Item, Integer> enumReceivedRebelItems = toMapOfItem(receivedRebelItems);
+
+        return Stream.of(enumGivenRebelItems, enumReceivedRebelItems)
+                .flatMap(m -> m.entrySet().stream())
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getKey,
+                        Collectors.summingInt(Map.Entry::getValue))
+                ).entrySet()
+                .stream()
+                .filter(e -> e.getValue() != 0)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private void validateRebel(Rebel rebel) throws Exception {
+        if (rebel.isBetrayal()) {
+            throw new Exception(rebel.getName() + " is betrayer and cannot negotiate its items");
+        }
+    }
+
+    private Map<Item, Integer> calculateInventoryAfterGiveItems(Rebel rebel, Map<String, Integer> items) {
+        Map<Item, Integer> enumItems = toMapOfItem(items);
+
+        List<ItemPossession> rebelItems = inventoryRepository.getRebelItems(rebel);
+
+        return rebelItems.stream()
+                .collect(Collectors.toMap(
+                        ItemPossession::getItem,
+                        i -> i.getQuantity() - enumItems.get(i.getItem())
+                ));
+    }
+
+    private void validateRebelItems(Rebel rebel, Map<String, Integer> rebelItems) throws Exception {
+        Map<Item, Integer> rebelInventory = this.calculateInventoryAfterGiveItems(
+                rebel, rebelItems
+        );
+
+        boolean rebelHaveAllItems = rebelInventory.values()
+                .stream()
+                .map(v -> v >= 0)
+                .reduce(true, Boolean::logicalAnd);
+
+        if (!rebelHaveAllItems) {
+            throw new Exception(rebel.getName() + " does not have all items");
+        }
+    }
+
+    private void validatePoints(Map<String, Integer> firstRebelItems,
+                                Map<String, Integer> secondRebelItems) throws Exception {
+
+        Map<Item, Integer> enumFirstRebelItems = toMapOfItem(firstRebelItems);
+        Map<Item, Integer> enumSecondRebelItems = toMapOfItem(secondRebelItems);
+
+        if (sumItemsPoints(enumFirstRebelItems) != sumItemsPoints(enumSecondRebelItems)) {
+            throw new Exception("Rebels don't have same amount of points in negotiation");
+        }
+    }
+
+    private Map<Item, Integer> toMapOfItem(Map<String, Integer> itemNames) {
+        return itemNames.entrySet().stream().collect(Collectors.toMap(
+                i -> Item.toItem(i.getKey()),
+                Map.Entry::getValue
+        ));
+    }
+
+    private int sumItemsPoints(Map<Item, Integer> items) {
+        return items.entrySet()
+                .stream()
+                .map(i -> i.getKey().getPoints() * i.getValue())
+                .reduce(0, Integer::sum);
+    }
+
+    private void applyNegotiation(Rebel firstRebel,
+                                  Map<Item, Integer> firstRebelInventoryUpdates,
+                                  Rebel secondRebel,
+                                  Map<Item, Integer> secondRebelInventoryUpdates) {
+        applyNegotiationToRebel(firstRebel, firstRebelInventoryUpdates);
+        applyNegotiationToRebel(secondRebel, secondRebelInventoryUpdates);
+    }
+
+    private void applyNegotiationToRebel(Rebel rebel, Map<Item, Integer> inventoryUpdates) {
+        List<ItemPossession> notUpdatedInventory = rebel.getInventory()
+                .stream()
+                .filter(ip -> !inventoryUpdates.containsKey(ip.getItem()))
+                .collect(Collectors.toList());
+
+        List<ItemPossession> updateInventory = rebel.getInventory()
+                .stream()
+                .filter(ip -> inventoryUpdates.containsKey(ip.getItem()))
+                .map(ip -> ItemPossession.builder()
+                        .id(ip.getId())
+                        .item(ip.getItem())
+                        .quantity(ip.getQuantity() + inventoryUpdates.get(ip.getItem()))
+                        .rebel(ip.getRebel())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<ItemPossession> newItems = inventoryUpdates.entrySet()
+                .stream()
+                .filter(iu -> !rebel.getInventory()
+                        .stream()
+                        .map(ItemPossession::getItem)
+                        .collect(Collectors.toList())
+                        .contains(iu.getKey()))
+                .map(iu -> ItemPossession.builder()
+                        .quantity(iu.getValue())
+                        .item(iu.getKey())
+                        .rebel(rebel)
+                        .build())
+                .collect(Collectors.toList());
+
+        List<ItemPossession> finalInventory =
+                Stream.of(notUpdatedInventory, updateInventory, newItems)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+
+        rebel.setInventory(finalInventory);
+        rebelsRepository.save(rebel);
     }
 
     private ReportBetrayalDTO verifyRebel(BetrayalReport betrayalReport) {

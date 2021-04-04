@@ -21,6 +21,7 @@ public class InventoryMapper {
     public static List<ItemPossession> toItemPossessionList(List<ItemPossessionDTO> inventory, Rebel rebel) {
         return inventory.stream()
                 .map(itemPossessionDTO -> toItemPossession(itemPossessionDTO, rebel))
+                .filter(itemPossessionDTO -> itemPossessionDTO.getQuantity() > 0)
                 .collect(Collectors.toList());
     }
 
@@ -35,6 +36,7 @@ public class InventoryMapper {
     public static List<ItemPossessionDTO> toItemDTOList(List<ItemPossession> inventory) {
         return inventory.stream()
                 .map(InventoryMapper::toItemPossessionDTO)
+                .filter(itemPossession -> itemPossession.getQuantity() > 0)
                 .collect(Collectors.toList());
     }
 }
