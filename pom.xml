@@ -14,7 +14,7 @@
 	<name>Star Wars Social Network</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
-		<java.version>8</java.version>
+		<java.version>11</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -59,11 +59,6 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.10</version>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
 		</dependency>
 
 		<dependency>
@@ -71,9 +66,6 @@
 			<artifactId>gson</artifactId>
 		</dependency>
 	</dependencies>
-
-
-
 
 	<build>
 		<plugins>
