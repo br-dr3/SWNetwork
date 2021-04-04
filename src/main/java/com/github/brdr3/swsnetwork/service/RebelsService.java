@@ -13,6 +13,7 @@ import com.github.brdr3.swsnetwork.dto.NegotiateItemsDTO;
 import com.github.brdr3.swsnetwork.dto.RebelBaseDTO;
 import com.github.brdr3.swsnetwork.dto.RebelDTO;
 import com.github.brdr3.swsnetwork.dto.ReportBetrayalDTO;
+import com.github.brdr3.swsnetwork.dto.StatsDTO;
 import com.github.brdr3.swsnetwork.mapper.RebelMapper;
 import com.github.brdr3.swsnetwork.mapper.ReportBetrayalMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -175,6 +177,44 @@ public class RebelsService {
         applyNegotiation(firstRebel, resultantFirstRebelItems,
                 secondRebel, resultantSecondRebelItems
         );
+    }
+
+    public StatsDTO getStats() {
+        List<Rebel> allRebels = rebelsRepository.findAll();
+
+        long rebels = allRebels.size();
+        long betrayers = allRebels.stream().filter(Rebel::isBetrayal).count();
+        long corruptedPoints = allRebels.stream()
+                .filter(Rebel::isBetrayal)
+                .mapToInt(r -> r.getInventory()
+                        .stream()
+                        .mapToInt(i -> (i.getItem().getPoints() * i.getQuantity()))
+                        .reduce(0, Integer::sum)
+                )
+                .reduce(0, Integer::sum);
+
+
+        Map<Item, Long> summarizedItems = allRebels.stream()
+                .map(r -> r.getInventory().stream()
+                                .map(i -> Map.entry(i.getItem(), (long) i.getQuantity()))
+                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                )
+                .flatMap(m -> m.entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)));
+
+        Map<String, Float> resourcesPerRebel = EnumSet.allOf(Item.class)
+                .stream()
+                .map(e -> Map.entry(
+                        e.toString(),
+                        summarizedItems.containsKey(e) ? summarizedItems.get(e) * 1.0f / rebels : 0f))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return StatsDTO.builder()
+                .rebels(rebels)
+                .betrayers(betrayers)
+                .corruptedPointsByBetrayers(corruptedPoints)
+                .resourcesPerRebel(resourcesPerRebel)
+                .build();
     }
 
     private Map<Item, Integer> calculateResultantExchangeItems(Map<String, Integer> givenRebelItems,
