@@ -28,6 +28,7 @@ public class RebelsService {
     private final RebelsRepository rebelsRepository;
     private final RebelBasesRepository rebelBasesRepository;
     private final BetrayalReportRepository betrayalReportRepository;
+
     @Value("${REPORTS_TO_CONSIDER_BETRAYAL}")
     private int REPORTS_TO_CONSIDER_BETRAYAL;
 
@@ -41,15 +42,16 @@ public class RebelsService {
     public RebelBaseDTO insertOrGetRebelBase(RebelBaseDTO rebelBaseDTO) throws Exception {
         RebelBase rebelBase = null;
 
-        if (rebelBaseDTO.getName() != null && rebelBaseDTO.getLatitude() != null &&
-            rebelBaseDTO.getLongitude() != null) {
-            return this.insertOrGetRebelBase(rebelBaseDTO.getName(), rebelBaseDTO.getLatitude(),
-                    rebelBaseDTO.getLongitude()
-            );
+        if (rebelBaseDTO.getName() != null
+                && rebelBaseDTO.getLatitude() != null
+                && rebelBaseDTO.getLongitude() != null) {
+            return this.insertOrGetRebelBase(
+                    rebelBaseDTO.getName(), rebelBaseDTO.getLatitude(), rebelBaseDTO.getLongitude());
         }
 
-        if (rebelBaseDTO.getName() == null && rebelBaseDTO.getLatitude() == null &&
-            rebelBaseDTO.getLongitude() == null) {
+        if (rebelBaseDTO.getName() == null
+                && rebelBaseDTO.getLatitude() == null
+                && rebelBaseDTO.getLongitude() == null) {
             throw new Exception("No argument was provided to get Rebel Base");
         }
 
@@ -58,12 +60,14 @@ public class RebelsService {
         }
 
         if (rebelBaseDTO.getLatitude() != null && rebelBaseDTO.getLongitude() != null) {
-            rebelBase = rebelBasesRepository.findByUniqueKey(rebelBaseDTO.getLatitude(), rebelBaseDTO.getLongitude());
+            rebelBase = rebelBasesRepository.findByUniqueKey(
+                    rebelBaseDTO.getLatitude(), rebelBaseDTO.getLongitude());
         }
 
         if (rebelBase == null) {
-            throw new Exception("Missing arguments to insert new Rebel Base and could not find any base with given " +
-                                "attributes");
+            throw new Exception(
+                    "Missing arguments to insert new Rebel Base and could not find any base with given "
+                            + "attributes");
         }
 
         return RebelMapper.toRebelBaseDTO(rebelBase);
@@ -76,11 +80,11 @@ public class RebelsService {
         try {
             Rebel savedRebel = rebelsRepository.save(RebelMapper.toRebel(rebelDTO));
             return RebelMapper.toRebelDTO(savedRebel);
-        } catch (DataIntegrityViolationException e) {
-            throw new Exception("Could not insert rebel on base. Maybe rebel already exist or its inventory has " +
-                                "duplicated items");
+        } catch (Exception e) {
+            throw new Exception(
+                    "Could not insert rebel on base. Maybe rebel already exist, its gender doesn't exists"
+                            + " or its inventory has invalid or duplicated items");
         }
-
     }
 
     public RebelDTO getRebel(UUID id) {
@@ -95,8 +99,8 @@ public class RebelsService {
     public RebelDTO getRebelByName(String name) {
         try {
             Rebel rebel = rebelsRepository.findByUniqueKey(name);
-            return RebelMapper.toRebelDTO(rebel);
-        } catch (EntityNotFoundException e) {
+            return rebel != null ? RebelMapper.toRebelDTO(rebel): null;
+        } catch (Exception e) {
             return null;
         }
     }
@@ -128,8 +132,9 @@ public class RebelsService {
             throw new Exception("Could not get reported rebel using parameters provided");
         }
 
-        BetrayalReport savedBetrayalReport = betrayalReportRepository.saveAndFlush(
-                ReportBetrayalMapper.toBetrayalReport(reportBetrayalDTO, reporter, reported));
+        BetrayalReport savedBetrayalReport =
+                betrayalReportRepository.saveAndFlush(
+                        ReportBetrayalMapper.toBetrayalReport(reportBetrayalDTO, reporter, reported));
         return this.verifyRebel(savedBetrayalReport);
     }
 
@@ -137,18 +142,21 @@ public class RebelsService {
         List<BetrayalReport> reportsToRebel =
                 betrayalReportRepository.getBetrayalReportsToRebel(betrayalReport.getReported());
 
-        if (reportsToRebel.size() >= REPORTS_TO_CONSIDER_BETRAYAL && !betrayalReport.getReported().isBetrayal()) {
+        if (reportsToRebel.size() >= REPORTS_TO_CONSIDER_BETRAYAL
+                && !betrayalReport.getReported().isBetrayal()) {
             Rebel reported = betrayalReport.getReported();
             reported.setBetrayal(true);
             rebelsRepository.saveAndFlush(reported);
 
-            return ReportBetrayalMapper.toReportBetrayalDTO(betrayalReportRepository.getOne(betrayalReport.getId()));
+            return ReportBetrayalMapper.toReportBetrayalDTO(
+                    betrayalReportRepository.getOne(betrayalReport.getId()));
         }
 
         return ReportBetrayalMapper.toReportBetrayalDTO(betrayalReport);
     }
 
-    private RebelBaseDTO insertOrGetRebelBase(String name, Float latitude, Float longitude) throws Exception {
+    private RebelBaseDTO insertOrGetRebelBase(String name, Float latitude, Float longitude)
+            throws Exception {
 
         if (name == null || latitude == null || longitude == null) {
             throw new Exception("All parameters should be not null");
@@ -165,7 +173,8 @@ public class RebelsService {
             return RebelMapper.toRebelBaseDTO(rebelBaseByName);
         }
 
-        RebelBase savedRebelBase = rebelBasesRepository.save(new RebelBase(null, name, latitude, longitude));
+        RebelBase savedRebelBase =
+                rebelBasesRepository.save(new RebelBase(null, name, latitude, longitude));
         return RebelMapper.toRebelBaseDTO(savedRebelBase);
     }
 }

@@ -43,7 +43,7 @@ public class Rebel {
     @ColumnDefault("false")
     private boolean betrayal;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @ManyToOne

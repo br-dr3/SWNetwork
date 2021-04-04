@@ -10,6 +10,8 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -24,7 +26,7 @@ import java.util.UUID;
 @Setter
 @Getter
 @Builder
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "rebel_id"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"item_name", "rebel_id"}))
 public class ItemPossession {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -32,7 +34,9 @@ public class ItemPossession {
     @Column(name = "item_possession_id", updatable = false, nullable = false)
     private UUID id;
 
-    private String name;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "item_name", nullable = false)
+    private Item item;
 
     private int quantity;
 

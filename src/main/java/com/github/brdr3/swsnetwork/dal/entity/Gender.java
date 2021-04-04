@@ -1,11 +1,13 @@
 package com.github.brdr3.swsnetwork.dal.entity;
 
 public enum Gender {
-    MALE("Male"), FEMALE("Female"), NOT_DEFINED("Not defined");
+    MALE("Male"),
+    FEMALE("Female"),
+    NOT_DEFINED("Not defined");
 
     private final String name;
 
-    private Gender(String s) {
+    Gender(String s) {
         this.name = s;
     }
 

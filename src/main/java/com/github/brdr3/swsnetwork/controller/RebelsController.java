@@ -47,7 +47,7 @@ public class RebelsController {
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                             .body("Could not find any rebel with id '" + id.toString() + "'");
+                .body("Could not find any rebel with id '" + id.toString() + "'");
     }
 
     @GetMapping("/name/{name}")
