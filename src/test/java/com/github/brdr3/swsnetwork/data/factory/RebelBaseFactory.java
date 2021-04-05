@@ -24,4 +24,13 @@ public class RebelBaseFactory extends Factory {
                 .longitude(new Random().nextFloat())
                 .build();
     }
+
+    public RebelBaseDTO cloneIgnoringId(RebelBaseDTO other) {
+        return RebelBaseDTO.builder()
+                .id(null)
+                .name(other.getName())
+                .latitude(other.getLatitude())
+                .longitude(other.getLongitude())
+                .build();
+    }
 }

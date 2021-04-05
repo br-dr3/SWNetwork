@@ -12,7 +12,7 @@ public class ReportBetrayalFactory extends Factory {
                 .id(UUID.randomUUID())
                 .createdAt(faker.date().between(new Date(now.getTime() - 100000), new Date(now.getTime() + 100000)))
                 .reporter(UUID.randomUUID())
-                .reporter(UUID.randomUUID())
+                .reported(UUID.randomUUID())
                 .build();
     }
 
@@ -21,7 +21,7 @@ public class ReportBetrayalFactory extends Factory {
                 .id(null)
                 .createdAt(otherReport.getCreatedAt())
                 .reporter(otherReport.getReporter())
-                .reporter(otherReport.getReported())
+                .reported(otherReport.getReported())
                 .build();
     }
 }
